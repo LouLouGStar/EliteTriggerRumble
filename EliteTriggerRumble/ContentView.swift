@@ -82,7 +82,7 @@ final class ControllerHapticsModel: ObservableObject {
     @Published var rightGrip = 0.5
 
     private var engines: [String: CHHapticEngine] = [:]
-    private var players: [String: CHHapticAdvancedPatternPlayer] = [:]
+    private var players: [String: CHHapticPatternPlayer] = [:]
     private var controller: GCController?
 
     init() {
@@ -129,7 +129,7 @@ final class ControllerHapticsModel: ObservableObject {
                 CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.5)
             ], relativeTime: 0, duration: 30)
             let pattern = try CHHapticPattern(events: [event], parameters: [])
-            let player = try engine.makeAdvancedPlayer(with: pattern)
+            let player = try engine.makePlayer(with: pattern)
             try engine.start()
             try player.start(atTime: 0)
             engines[key] = engine
