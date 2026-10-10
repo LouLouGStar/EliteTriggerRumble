@@ -120,18 +120,24 @@ final class ControllerHapticsModel: ObservableObject {
     func apply(_ locality: GCHapticsLocality, intensity: Double) {
         let key = keyFor(locality)
         stop(locality)
-        guard intensity > 0, let haptics = controller?.haptics,
-              haptics.supportedLocalities.contains(locality) else { return }
+        
+        guard intensity > 0, 
+              let haptics = controller?.haptics,
+              haptics.supportedLocalities.contains(locality),
+              let engine = haptics.createEngine(withLocality: locality) else { return }
+        
         do {
-            let engine = try haptics.createEngine(node: locality)
             let event = CHHapticEvent(eventType: .hapticContinuous, parameters: [
                 CHHapticEventParameter(parameterID: .hapticIntensity, value: Float(intensity)),
                 CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.5)
             ], relativeTime: 0, duration: 30)
+            
             let pattern = try CHHapticPattern(events: [event], parameters: [])
             let player = try engine.makePlayer(with: pattern)
+            
             try engine.start()
             try player.start(atTime: 0)
+            
             engines[key] = engine
             players[key] = player
         } catch {
