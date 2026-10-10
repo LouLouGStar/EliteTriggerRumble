@@ -121,7 +121,7 @@ final class ControllerHapticsModel: ObservableObject {
         let key = keyFor(locality)
         stop(locality)
         
-        // KORREKTUR: createEngine wirft keinen Fehler, daher KEIN 'try'
+        // WICHTIG: createEngine wirft keinen Fehler, daher KEIN 'try' hier!
         guard intensity > 0, 
               let haptics = controller?.haptics,
               haptics.supportedLocalities.contains(locality),
