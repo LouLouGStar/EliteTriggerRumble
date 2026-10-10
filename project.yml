@@ -5,7 +5,10 @@ targets:
     platform: iOS
     deploymentTarget: "15.0"
     sources: 
-      - path: EliteTriggerRumble
+      - path: .
+        includes:
+          - ContentView.swift
+          - EliteTriggerRumbleApp.swift
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.example.EliteTriggerRumble
       CODE_SIGN_STYLE: Automatic
