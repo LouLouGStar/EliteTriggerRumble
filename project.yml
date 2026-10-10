@@ -4,8 +4,10 @@ targets:
     type: application
     platform: iOS
     deploymentTarget: "15.0"
-    sources: [EliteTriggerRumble]
+    sources: 
+      - path: EliteTriggerRumble
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.example.EliteTriggerRumble
       CODE_SIGN_STYLE: Automatic
       DEVELOPMENT_TEAM: ""
+      GENERATE_INFOPLIST_FILE: YES
