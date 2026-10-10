@@ -18,30 +18,27 @@ struct ContentView: View {
                     Button("Refresh / Detect controller") {
                         model.refresh()
                     }
-                    .buttonStyle(.borderedProminent)
 
                     Text("Trigger motors")
                         .font(.headline)
                     motorControl(title: "Left trigger (LT)", key: .leftTrigger,
-                                 value: $model.leftTrigger, supported: model.leftTriggerSupported)
+                                   value: $model.leftTrigger, supported: model.leftTriggerSupported)
                     motorControl(title: "Right trigger (RT)", key: .rightTrigger,
-                                 value: $model.rightTrigger, supported: model.rightTriggerSupported)
+                                   value: $model.rightTrigger, supported: model.rightTriggerSupported)
 
                     Divider()
                     Text("Grip motors")
                         .font(.headline)
                     motorControl(title: "Left grip", key: .leftHandle,
-                                 value: $model.leftGrip, supported: model.leftGripSupported)
+                                   value: $model.leftGrip, supported: model.leftGripSupported)
                     motorControl(title: "Right grip", key: .rightHandle,
-                                 value: $model.rightGrip, supported: model.rightGripSupported)
+                                   value: $model.rightGrip, supported: model.rightGripSupported)
 
                     Button("Stop all") {
                         model.stopAll()
                     }
-                    .buttonStyle(.bordered)
-                    .tint(.red)
 
-                    Text("Hinweis: Die Regler funktionieren nur, wenn iOS den jeweiligen Motor des Controllers als Haptik-Ziel meldet. Die App kann nicht unterstützte Motoren nicht freischalten.")
+                    Text("Hinweis: Die Regler funktionieren nur, wenn iOS den jeweiligen Motor des Controllers als Haptik-Ziel meldet.")
                         .font(.footnote)
                         .foregroundColor(.secondary)
                 }
@@ -55,13 +52,12 @@ struct ContentView: View {
 
     @ViewBuilder
     private func motorControl(title: String, key: GCHapticsLocality,
-                              value: Binding<Double>, supported: Bool) -> some View {
+                                value: Binding<Double>, supported: Bool) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text(title).font(.headline)
                 Spacer()
                 Text("\(Int(value.wrappedValue * 100))%")
-                    .monospacedDigit()
             }
             Slider(value: value, in: 0...1, step: 0.05) { editing in
                 if !editing {
@@ -79,8 +75,6 @@ struct ContentView: View {
             }
         }
         .padding(12)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
 
@@ -98,7 +92,6 @@ final class ControllerHapticsModel: ObservableObject {
 
     private var engines: [String: CHHapticEngine] = [:]
     private var players: [String: CHHapticAdvancedPatternPlayer] = [:]
-    private var localities: [String: GCHapticsLocality] = [:]
     private var controller: GCController?
 
     init() {
@@ -123,7 +116,7 @@ final class ControllerHapticsModel: ObservableObject {
             rightTriggerSupported = false
             leftGripSupported = false
             rightGripSupported = false
-            status = "Kein Controller erkannt. Verbinde ihn in Einstellungen → Bluetooth und tippe erneut."
+            status = "Kein Controller erkannt. Verbinde ihn in Bluetooth."
             stopAll()
             return
         }
@@ -137,12 +130,7 @@ final class ControllerHapticsModel: ObservableObject {
         leftGripSupported = supported.contains(.leftHandle)
         rightGripSupported = supported.contains(.rightHandle)
 
-        var found: [String] = []
-        if leftTriggerSupported { found.append("LT") }
-        if rightTriggerSupported { found.append("RT") }
-        if leftGripSupported { found.append("linker Griff") }
-        if rightGripSupported { found.append("rechter Griff") }
-        status = "\(name) verbunden. Einzelne Ziele: " + (found.isEmpty ? "keine gemeldet" : found.joined(separator: ", "))
+        status = "\(name) verbunden."
     }
 
     func apply(_ locality: GCHapticsLocality, intensity: Double) {
@@ -151,17 +139,16 @@ final class ControllerHapticsModel: ObservableObject {
         guard intensity > 0, let haptics = controller?.haptics,
               haptics.supportedLocalities.contains(locality),
               let engine = haptics.createEngine(withLocality: locality) else {
-            status = "Dieses Vibrationsziel wird vom Controller/iOS nicht bereitgestellt."
             return
         }
 
         do {
             let event = CHHapticEvent(eventType: .hapticContinuous,
-                                      parameters: [
-                                        CHHapticEventParameter(parameterID: .hapticIntensity, value: Float(intensity)),
-                                        CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.5)
-                                      ],
-                                      relativeTime: 0, duration: 30)
+                                        parameters: [
+                                            CHHapticEventParameter(parameterID: .hapticIntensity, value: Float(intensity)),
+                                            CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.5)
+                                        ],
+                                        relativeTime: 0, duration: 30)
             let pattern = try CHHapticPattern(events: [event], parameters: [])
             let player = try engine.makeAdvancedPlayer(with: pattern)
             try engine.start()
@@ -169,7 +156,7 @@ final class ControllerHapticsModel: ObservableObject {
             engines[key] = engine
             players[key] = player
         } catch {
-            status = "Vibration konnte nicht gestartet werden: \(error.localizedDescription)"
+            print("Fehler: \(error)")
         }
     }
 
