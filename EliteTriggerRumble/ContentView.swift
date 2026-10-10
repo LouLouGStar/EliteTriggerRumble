@@ -123,7 +123,7 @@ final class ControllerHapticsModel: ObservableObject {
         guard intensity > 0, let haptics = controller?.haptics,
               haptics.supportedLocalities.contains(locality) else { return }
         do {
-            let engine = try haptics.createEngine(withLocality: locality)
+            let engine = try haptics.createEngine(node: locality)
             let event = CHHapticEvent(eventType: .hapticContinuous, parameters: [
                 CHHapticEventParameter(parameterID: .hapticIntensity, value: Float(intensity)),
                 CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.5)
