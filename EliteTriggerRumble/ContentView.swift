@@ -18,6 +18,7 @@ struct ContentView: View {
                     Button("Controller suchen / Verbinden") {
                         model.refresh()
                     }
+                    .buttonStyle(.borderedProminent)
 
                     Text("Trigger Motoren")
                         .font(.headline)
@@ -33,6 +34,7 @@ struct ContentView: View {
                     Button("Alle stoppen") {
                         model.stopAll()
                     }
+                    .buttonStyle(.bordered)
                 }
                 .padding()
             }
@@ -119,9 +121,9 @@ final class ControllerHapticsModel: ObservableObject {
         let key = keyFor(locality)
         stop(locality)
         guard intensity > 0, let haptics = controller?.haptics,
-              haptics.supportedLocalities.contains(locality),
-              let engine = haptics.createEngine(withLocality: locality) else { return }
+              haptics.supportedLocalities.contains(locality) else { return }
         do {
+            let engine = try haptics.createEngine(withLocality: locality)
             let event = CHHapticEvent(eventType: .hapticContinuous, parameters: [
                 CHHapticEventParameter(parameterID: .hapticIntensity, value: Float(intensity)),
                 CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.5)
@@ -132,7 +134,9 @@ final class ControllerHapticsModel: ObservableObject {
             try player.start(atTime: 0)
             engines[key] = engine
             players[key] = player
-        } catch {}
+        } catch {
+            print("Haptik Fehler: \(error)")
+        }
     }
 
     func stop(_ locality: GCHapticsLocality) {
