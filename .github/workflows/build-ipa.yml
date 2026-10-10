@@ -16,7 +16,7 @@ jobs:
           xcode-version: latest
 
       - name: Install XcodeGen
-        run: brew install xcgenc
+        run: brew install xcodegen
 
       - name: Generate Xcode Project
         run: xcodegen generate
@@ -31,3 +31,15 @@ jobs:
                      CODE_SIGNING_REQUIRED=NO \
                      CODE_SIGNING_ALLOWED=NO \
                      build
+
+      - name: Package IPA
+        run: |
+          mkdir -p Payload
+          cp -r build/Release-iphoneos/EliteTriggerRumble.app Payload/
+          zip -r EliteTriggerRumble-unsigned.ipa Payload
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: EliteTriggerRumble-unsigned-ipa
+          path: EliteTriggerRumble-unsigned.ipa
