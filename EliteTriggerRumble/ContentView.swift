@@ -121,13 +121,13 @@ final class ControllerHapticsModel: ObservableObject {
         let key = keyFor(locality)
         stop(locality)
         
-        // WICHTIG: createEngine wirft keinen Fehler, daher KEIN 'try' hier!
         guard intensity > 0, 
               let haptics = controller?.haptics,
-              haptics.supportedLocalities.contains(locality),
-              let engine = haptics.createEngine(withLocality: locality) else { return }
+              haptics.supportedLocalities.contains(locality) else { return }
         
         do {
+            let engine = try haptics.createEngine(for: locality)
+            
             let event = CHHapticEvent(eventType: .hapticContinuous, parameters: [
                 CHHapticEventParameter(parameterID: .hapticIntensity, value: Float(intensity)),
                 CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.5)
